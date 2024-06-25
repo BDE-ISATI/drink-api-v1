@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  website-api
+  Sample SAM Template for website-api
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+
+  DependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: DependenciesLayer
+      ContentUri: dependencies/
+      CompatibleRuntimes:
+        - python3.12
+
+  DrinkApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Name: website_api
+      EndpointConfiguration:
+        Type: REGIONAL
+      BinaryMediaTypes:
+        - "multipart/form-data"
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS,PATCH,PUT,DELETE'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+
+  ############################################# Members ####################################################
+
+  DrinkUsers:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: drink-users
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: "ID"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "ID"
+          KeyType: "HASH"
+
+  GetUsers:
+    Type: AWS::Serverless::Function
+    Properties:
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DrinkUsers
+      CodeUri: get_all_users/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - arm64
+      Layers:
+        - !Ref DependenciesLayer
+
+      Events:
+        GetUsers:
+          Type: Api
+          Properties:
+            Path: /users
+            Method: get
+            RestApiId: !Ref DrinkApi
+
+  UpdateUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 60
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DrinkUsers
+      CodeUri: update_user/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - arm64
+      Layers:
+        - !Ref DependenciesLayer
+      Events:
+        UpdateUser:
+          Type: Api
+          Properties:
+            Path: /users/update
+            Method: any
+            RestApiId: !Ref DrinkApi
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${DrinkApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
