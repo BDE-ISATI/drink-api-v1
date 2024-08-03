@@ -90,6 +90,123 @@ Resources:
             Method: any
             RestApiId: !Ref DrinkApi
 
+  ############################################# Drinks ####################################################
+
+  DrinkDrinks:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: drink-drinks
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: "ID"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "ID"
+          KeyType: "HASH"
+
+  GetDrinks:
+    Type: AWS::Serverless::Function
+    Properties:
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DrinkDrinks
+      CodeUri: get_all_drinks/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - arm64
+      Layers:
+        - !Ref DependenciesLayer
+
+      Events:
+        GetDrinks:
+          Type: Api
+          Properties:
+            Path: /drinks
+            Method: get
+            RestApiId: !Ref DrinkApi
+
+  UpdateDrinks:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 60
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DrinkDrinks
+      CodeUri: update_drinks/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - arm64
+      Layers:
+        - !Ref DependenciesLayer
+      Events:
+        UpdateUser:
+          Type: Api
+          Properties:
+            Path: /drinks/update
+            Method: any
+            RestApiId: !Ref DrinkApi
+
+  ############################################# Events ####################################################
+
+  DrinkEvents:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: drink-events
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: "ID"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "ID"
+          KeyType: "HASH"
+
+  GetEvents:
+    Type: AWS::Serverless::Function
+    Properties:
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DrinkEvents
+      CodeUri: get_all_events/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - arm64
+      Layers:
+        - !Ref DependenciesLayer
+
+      Events:
+        GetEvents:
+          Type: Api
+          Properties:
+            Path: /events
+            Method: get
+            RestApiId: !Ref DrinkApi
+
+  UpdateEvent:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 60
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DrinkEvents
+      CodeUri: update_event/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - arm64
+      Layers:
+        - !Ref DependenciesLayer
+      Events:
+        UpdateEvent:
+          Type: Api
+          Properties:
+            Path: /events/update
+            Method: any
+            RestApiId: !Ref DrinkApi
+
+
 Outputs:
   ApiUrl:
     Description: "API Gateway endpoint URL for Prod stage for Hello World function"
