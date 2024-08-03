@@ -7,7 +7,7 @@ table = dynamodb.Table('drink-drinks')
 
 def myfunc():
     response = table.scan()
-    return "ok",events
+    return "ok",response["Items"]
 
 def lambda_handler(event, context):
     return my_module.trycatch(myfunc)
