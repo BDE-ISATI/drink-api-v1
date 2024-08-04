@@ -3,7 +3,7 @@ import boto3
 import my_module
 
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('drink-drinks')
+table = dynamodb.Table('drink-users')
 
 def myfunc(event):
     body = json.loads(event["body"])

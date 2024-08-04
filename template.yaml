@@ -98,11 +98,15 @@ Resources:
       TableName: drink-drinks
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: "ID"
+        - AttributeName: "userID"
+          AttributeType: "S"
+        - AttributeName: "eventID"
           AttributeType: "S"
       KeySchema:
-        - AttributeName: "ID"
+        - AttributeName: "userID"
           KeyType: "HASH"
+        - AttributeName: "eventID"
+          KeyType: "RANGE"
 
   GetDrinks:
     Type: AWS::Serverless::Function
